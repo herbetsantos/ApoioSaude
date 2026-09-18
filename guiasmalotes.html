@@ -699,11 +699,44 @@ function adicionarUnidadeOutra(nomeDigitado) {
   return nova;
 }
 
+const ALIASES_UNIDADES = {
+  portal: ['PORTAL', 'PORTAL IPES', 'PORTAL DOS IPES', 'PORTAL IPES III'],
+  km43: ['KM 43', 'KM43'],
+  marialuiza: ['MARIA LUIZA', 'COLINA MARIA LUIZA'],
+  guaturinho: ['GUATURINHO'],
+  parquesaoroberto: ['PARQUE SAO ROBERTO', 'SAO ROBERTO'],
+  cajamarcento: ['CAJAMAR CENTRO', 'CENTRO DE CAJAMAR'],
+  capsij: ['CAPS IJ', 'CAPS INFANTO JUVENIL']
+};
+
+function compactarBusca(s) {
+  return normalizar(s).replace(/[^A-Z0-9]/g, '');
+}
+
 function matchUnidade(u, qNorm) {
   if (!qNorm) return true;
-  return normalizar(u.nome).includes(qNorm)
-      || normalizar(u.iniciais).includes(qNorm)
-      || normalizar(u.code).includes(qNorm);
+
+  const qCompacto = compactarBusca(qNorm);
+  const nomeNorm = normalizar(u.nome);
+  const iniciaisNorm = normalizar(u.iniciais);
+  const codeNorm = normalizar(u.code);
+
+  if (nomeNorm.includes(qNorm) || iniciaisNorm.includes(qNorm) || codeNorm.includes(qNorm)) {
+    return true;
+  }
+
+  if (qCompacto) {
+    if (compactarBusca(u.nome).includes(qCompacto)
+        || compactarBusca(u.iniciais).includes(qCompacto)
+        || compactarBusca(u.code).includes(qCompacto)) {
+      return true;
+    }
+  }
+
+  return (ALIASES_UNIDADES[u.code] || []).some(alias => {
+    const aliasNorm = normalizar(alias);
+    return aliasNorm.includes(qNorm) || compactarBusca(aliasNorm).includes(qCompacto);
+  });
 }
 
 function renderOpcoesUnidade(dropdownEl, query) {
