@@ -56,11 +56,16 @@
     async function goToNext(url) {
       if (url.startsWith('/')) { window.location.href = url; return; }
       try {
-        const res = await fetch('/api/handoff', { method: 'POST', credentials: 'same-origin' });
+        const res = await fetch('/api/handoff', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feature_key: 'regulacao_vagas' }) });
         if (res.ok) {
           const { token } = await res.json();
           const sep = url.includes('?') ? '&' : '?';
           window.location.href = `${url}${sep}handoff=${encodeURIComponent(token)}`;
+          return;
+        }
+        if (res.status === 403) {
+          const data = await res.json().catch(() => ({}));
+          window.location.href = `/portal.html?erro=${encodeURIComponent(data.error || 'Você não tem acesso ao eMulti.')}`;
           return;
         }
       } catch { /* cai no fallback abaixo */ }

@@ -1,11 +1,8 @@
-// POST /api/handoff -> gera um código de uso único (60s de validade) para autenticação entre aplicações apartadas. O eMulti NÃO lê este D1.
-// O token é trocado por identidade no endpoint servidor-a-servidor
-// /api/handoff/consume e o eMulti cria sua própria sessão no próprio banco.
-// Ver migration_regulacao_setup.sql (tabela handoff_tokens) e o
-// functions/_middleware.js do projeto regulacao-vagas-cajamar, que consome
-// este código.
+// POST /api/handoff -> gera um código de uso único (60s) para o eMulti.
+// O código só é emitido a usuários autenticados com regulacao_vagas liberada.
 
 import { json, getAuthUser } from './_utils.js';
+import { getUserPermissions } from './_permissions.js';
 
 function randomToken() {
   const bytes = new Uint8Array(32);
@@ -17,6 +14,16 @@ export async function onRequestPost({ request, env }) {
   const user = await getAuthUser(request, env);
   if (!user) return json({ error: 'Não autenticado.' }, 401);
 
+  let featureKey = 'regulacao_vagas';
+  try {
+    const body = await request.json();
+    if (body?.feature_key) featureKey = String(body.feature_key).trim();
+  } catch { /* corpo é opcional para compatibilidade */ }
+
+  if (featureKey !== 'regulacao_vagas') return json({ error: 'Destino de ingresso inválido.' }, 400);
+  const permissions = await getUserPermissions(env, user);
+  if (!permissions.regulacao_vagas) return json({ error: 'Acesso ao eMulti não autorizado.' }, 403);
+
   const token = randomToken();
   const expiresAt = new Date(Date.now() + 60 * 1000).toISOString();
 
@@ -24,7 +31,6 @@ export async function onRequestPost({ request, env }) {
     'INSERT INTO handoff_tokens (token, user_id, expires_at) VALUES (?, ?, ?)'
   ).bind(token, user.id, expiresAt).run();
 
-  // Limpeza best-effort de códigos velhos, pra tabela não crescer para sempre.
   try {
     await env.DB.prepare("DELETE FROM handoff_tokens WHERE expires_at < datetime('now', '-1 hour')").run();
   } catch { /* não crítico */ }

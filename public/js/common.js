@@ -302,10 +302,17 @@ function setupFerramentasDropdown() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
-async function goToExternalWithHandoff(url, openMode) {
+const HANDOFF_FEATURE_KEYS = new Set(['regulacao_vagas']);
+
+async function goToExternalWithHandoff(url, openMode, featureKey) {
   const abrirNovaAba = openMode !== '_self';
   try {
-    const res = await fetch('/api/handoff', { method: 'POST', credentials: 'same-origin' });
+    const res = await fetch('/api/handoff', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ feature_key: featureKey }),
+    });
     if (res.ok) {
       const { token } = await res.json();
       const sep = url.includes('?') ? '&' : '?';
@@ -314,8 +321,12 @@ async function goToExternalWithHandoff(url, openMode) {
       else window.location.href = finalUrl;
       return;
     }
+    if (res.status === 403) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Você não tem acesso a esta aplicação.');
+      return;
+    }
   } catch { /* cai no fallback abaixo */ }
-  // fallback: vai sem o código (site vai pedir login de novo)
   if (abrirNovaAba) window.open(url, '_blank', 'noopener');
   else window.location.href = url;
 }
@@ -327,29 +338,26 @@ async function loadFerramentasMenu(perms) {
     const res = await fetch('/api/links?category=ferramenta', { credentials: 'same-origin' });
     const data = await res.json();
     let links = data.links || [];
-    // Um link sem feature_key associado (ainda não configurado) continua
-    // aparecendo para todos, pra não sumir ferramenta nenhuma sem querer.
     if (perms) {
       links = links.filter((l) => !l.feature_key || perms[l.feature_key] !== false);
     }
     menu.innerHTML = links.length
       ? links.map((l) => {
           const isExternal = /^https?:\/\//i.test(l.url) && new URL(l.url, window.location.href).hostname !== window.location.hostname;
+          const useHandoff = isExternal && HANDOFF_FEATURE_KEYS.has(l.feature_key);
           const novaAba = l.open_mode !== '_self';
-          const targetAttr = isExternal ? '' : ` target="${novaAba ? '_blank' : '_self'}" rel="noopener"`;
+          const targetAttr = useHandoff ? '' : ` target="${novaAba ? '_blank' : '_self'}" rel="noopener"`;
           return `
-          <a class="submenu__link" href="${escapeAttr(l.url)}"${targetAttr}${isExternal ? ` data-external-tool="1" data-open-mode="${l.open_mode === '_self' ? '_self' : '_blank'}"` : ''}>
+          <a class="submenu__link" href="${escapeAttr(l.url)}"${targetAttr}${useHandoff ? ` data-external-tool="1" data-feature-key="${escapeAttr(l.feature_key)}" data-open-mode="${l.open_mode === '_self' ? '_self' : '_blank'}"` : ''}>
             <span class="cross">✚</span>${escapeHtml(l.title)}
           </a>`;
         }).join('')
       : `<div class="submenu__link" style="color:var(--muted)">Nenhuma ferramenta cadastrada</div>`;
 
-    // Links para outro projeto (*.pages.dev diferente, ex.: Regulação de
-    // Vagas) precisam do código de repasse — ver goToExternalWithHandoff.
     menu.querySelectorAll('a[data-external-tool]').forEach((a) => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        goToExternalWithHandoff(a.getAttribute('href'), a.dataset.openMode);
+        goToExternalWithHandoff(a.getAttribute('href'), a.dataset.openMode, a.dataset.featureKey);
       });
     });
   } catch {

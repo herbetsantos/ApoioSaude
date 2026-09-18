@@ -1,6 +1,5 @@
-// Permissões próprias do Apoio.
-// O eMulti Regulação é uma aplicação apartada e não participa do modelo
-// de permissões deste portal. O Apoio responde apenas pela identidade/login.
+// Permissões próprias do Apoio e permissões individuais de ingresso em aplicações integradas.
+// O eMulti mantém suas responsabilidades internas no próprio banco; aqui controlamos apenas se o usuário pode iniciar o ingresso compartilhado.
 
 export const FEATURES = [
   { key: 'receituario', label: 'Receituário' },
@@ -10,12 +9,15 @@ export const FEATURES = [
   { key: 'documentos', label: 'Documentos Úteis' },
   { key: 'manuais', label: 'Manuais de Uso' },
   { key: 'relatorios', label: 'Relatórios' },
+  { key: 'regulacao_vagas', label: 'eMulti | Regulação', individualOnly: true },
   { key: 'administracao', label: 'Administração' },
 ];
 
 export const FEATURE_KEYS = FEATURES.map((f) => f.key);
 const FEATURE_KEY_SET = new Set(FEATURE_KEYS);
+const INDIVIDUAL_ONLY = new Set(FEATURES.filter((f) => f.individualOnly).map((f) => f.key));
 export function isFeatureKey(key) { return FEATURE_KEY_SET.has(key); }
+export function isIndividualOnlyFeature(key) { return INDIVIDUAL_ONLY.has(key); }
 
 function allTrue() { const m={}; FEATURE_KEYS.forEach((k)=>{m[k]=true;}); return m; }
 function allFalse() { const m={}; FEATURE_KEYS.forEach((k)=>{m[k]=false;}); return m; }
@@ -27,10 +29,16 @@ export async function getRoleCeiling(env, role) {
       'SELECT feature_key, enabled FROM role_permissions WHERE role = ?'
     ).bind(role).all();
     const ceiling = allFalse();
-    (results || []).forEach((r) => { if (isFeatureKey(r.feature_key)) ceiling[r.feature_key] = !!r.enabled; });
+    // Features individualOnly não recebem padrão por papel; true aqui significa apenas que podem ser configuradas individualmente.
+    INDIVIDUAL_ONLY.forEach((k) => { ceiling[k] = true; });
+    (results || []).forEach((r) => {
+      if (isFeatureKey(r.feature_key) && !isIndividualOnlyFeature(r.feature_key)) ceiling[r.feature_key] = !!r.enabled;
+    });
     return ceiling;
   } catch {
-    return allTrue();
+    const fallback = allTrue();
+    INDIVIDUAL_ONLY.forEach((k) => { fallback[k] = true; });
+    return fallback;
   }
 }
 
@@ -44,12 +52,19 @@ export async function getUserPermissions(env, user) {
     const overrides = {};
     (results || []).forEach((r) => { if (isFeatureKey(r.feature_key)) overrides[r.feature_key] = !!r.enabled; });
     const effective = {};
-    FEATURE_KEYS.forEach((k) => {
+    FEATURES.forEach((f) => {
+      const k = f.key;
+      if (f.individualOnly) {
+        effective[k] = Object.prototype.hasOwnProperty.call(overrides, k) ? !!overrides[k] : false;
+        return;
+      }
       const wanted = Object.prototype.hasOwnProperty.call(overrides, k) ? overrides[k] : ceiling[k];
       effective[k] = !!ceiling[k] && !!wanted;
     });
     return effective;
   } catch {
-    return ceiling;
+    const fallback = { ...ceiling };
+    INDIVIDUAL_ONLY.forEach((k) => { fallback[k] = false; });
+    return fallback;
   }
 }

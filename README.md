@@ -2,6 +2,8 @@
 
 **Plataforma:** Cloudflare Workers + Static Assets + D1.
 
+A versão 2.11.4 corrige o ingresso compartilhado com o eMulti: `regulacao_vagas` é uma permissão individual e o handoff só é emitido para usuários autorizados.
+
 A versão 2.11.0 migra a aplicação do Cloudflare Pages para Workers, preservando as rotas existentes de `functions/` por compilação no build. Consulte `WORKERS_MIGRATION.md` para implantação.
 
 # Apoio

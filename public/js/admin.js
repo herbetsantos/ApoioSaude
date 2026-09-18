@@ -9,6 +9,7 @@ const FERRAMENTA_FEATURE_OPTIONS = [
   { key: 'malotes', label: 'Malotes e Remessas' },
   { key: 'facilitawhats', label: 'FacilitaWhats' },
   { key: 'mensageiro_esus', label: 'Mensageiro eSUS' },
+  { key: 'regulacao_vagas', label: 'eMulti | Regulação' },
 ];
 let currentUser = null;
 

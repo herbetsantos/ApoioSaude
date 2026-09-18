@@ -1,6 +1,6 @@
 PRAGMA foreign_keys = ON;
 
--- Apoio v2.11.3 — portal-saude-db
+-- Apoio v2.11.4 — portal-saude-db
 -- Banco EXCLUSIVO do Apoio: identidade/login e módulos próprios.
 -- O eMulti Regulação não lê este D1 e mantém seu próprio regulacao-vagas-db.
 
@@ -326,5 +326,5 @@ CREATE TABLE IF NOT EXISTS app_db_meta (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 INSERT INTO app_db_meta (app_key, schema_version, updated_at)
-VALUES ('apoio', '2.11.3', datetime('now'))
+VALUES ('apoio', '2.11.4', datetime('now'))
 ON CONFLICT(app_key) DO UPDATE SET schema_version=excluded.schema_version, updated_at=excluded.updated_at;

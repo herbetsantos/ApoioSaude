@@ -1,5 +1,13 @@
 # Apoio v2.11.0
 
+## 2.11.4 — Ingresso integrado e migração do Portal
+
+- Restaura `regulacao_vagas` como permissão individual de ingresso no eMulti, independente do papel no Apoio.
+- O endpoint `/api/handoff` agora recusa usuários sem essa permissão.
+- Links externos comuns deixam de receber token de handoff; o repasse é usado somente em aplicações explicitamente integradas.
+- Administração volta a reconhecer `regulacao_vagas` ao editar ferramentas e permissões individuais.
+- Mantém eMulti com banco próprio e o Apoio responsável apenas pela identidade de ingresso.
+
 ## 2.11.3 — Novo D1 definitivo
 
 - Binding `DB` atualizado para o `portal-saude-db` da conta Cloudflare definitiva.
