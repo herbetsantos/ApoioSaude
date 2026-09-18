@@ -1,0 +1,20 @@
+
+Index · HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="/js/theme.js"></script>
+<meta charset="UTF-8">
+<meta name="google-site-verification" content="B10lwzARXdaUTRUQrRj9bt878Htx8shXtDS1tbUJhlk" />
+<title>Apoio</title>
+<link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+<script>
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then((r) => { window.location.replace(r.ok ? '/portal.html' : '/login.html'); })
+    .catch(() => { window.location.replace('/login.html'); });
+</script>
+</body>
+</html>
+ 

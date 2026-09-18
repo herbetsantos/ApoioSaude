@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/theme.js"></script>
+<title>Administração — Apoio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/theme.css">
+<style>
+@media(max-width:900px){#usersListControls{grid-template-columns:1fr!important}.admin-pagination{justify-content:flex-start!important}}
+</style>
+</head>
+<body>
+
+<div id="app-topbar"></div>
+
+<main class="page">
+  <div class="page__header">
+    <div class="eyebrow">Área restrita</div>
+    <h1 class="page__title">Administração</h1>
+    <p class="page__subtitle">Gerencie as ferramentas, documentos, manuais e os usuários com acesso ao portal.</p>
+  </div>
+
+  <div id="notAdminMsg" class="empty-state" style="display:none">
+    Esta área é restrita a administradores.
+  </div>
+
+  <div class="admin-shell" id="adminShell" style="display:none">
+    <div class="admin-tabs">
+      <button class="admin-tab is-active" data-tab="updates">Atualizações</button>
+      <button class="admin-tab" data-tab="solicitacoes">Solicitações<span id="pendingBadge" class="admin-tab__count" style="display:none">0</span></button>
+      <button class="admin-tab" data-tab="ferramenta">Ferramentas</button>
+      <button class="admin-tab" data-tab="documento">Documentos Úteis</button>
+      <button class="admin-tab" data-tab="manual">Manuais de Uso</button>
+      <button class="admin-tab" data-tab="relatorios">Relatórios</button>
+      <button class="admin-tab" data-tab="unidades">Unidades</button>
+      <button class="admin-tab" data-tab="ouvidoria">Ouvidoria IA</button>
+      <button class="admin-tab" data-tab="perfis">Perfis de acesso</button>
+      <button class="admin-tab" data-tab="usuarios">Usuários</button>
+      <button class="admin-tab" data-tab="auditoria">Auditoria</button>
+      <button class="admin-tab" data-tab="chat-config" id="chatConfigTab" style="display:none">Chat e suporte</button>
+      <button class="admin-tab" data-tab="conta">Minha Conta</button>
+    </div>
+
+    <div class="admin-panel">
+
+<!-- Atualizações -->
+<section class="panel-section is-active" data-panel="updates">
+  <div class="panel-section__head">
+    <div>
+      <div class="panel-section__title">Atualizações</div>
+      <div class="panel-section__desc">Avisos e novidades exibidos na página inicial do portal.</div>
+    </div>
+  </div>
+  <div id="updatesTableWrap"><div class="skeleton-loading">Carregando…</div></div>
+
+  <form id="addUpdateForm" class="inline-form">
+    <div class="field field--full">
+      <label for="upTitle">Título</label>
+      <input type="text" id="upTitle" required>
+    </div>
+    <div class="field field--full">
+      <label for="upBody">Texto</label>
+      <textarea id="upBody" rows="3" required style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;resize:vertical"></textarea>
+    </div>
+    <div class="field">
+      <label for="upTag">Categoria/tag (opcional)</label>
+      <input type="text" id="upTag" placeholder="Ex.: Sistema, Aviso, Manutenção">
+    </div>
+    <div class="field">
+      <label for="upDate">Data</label>
+      <input type="date" id="upDate">
+    </div>
+    <div class="field">
+      <label for="upLinkUrl">Link/anexo (opcional)</label>
+      <input type="url" id="upLinkUrl" placeholder="https://">
+    </div>
+    <div class="field">
+      <label for="upLinkLabel">Texto do link (opcional)</label>
+      <input type="text" id="upLinkLabel" placeholder="Ex.: Ver anexo">
+    </div>
+    <div class="field">
+      <label for="upImageUrl">Imagem (URL ou caminho, opcional)</label>
+      <input type="text" id="upImageUrl" placeholder="https://… ou /assets/imagem.jpg">
+    </div>
+    <div class="field">
+      <label for="upImageFile">Ou selecionar imagem</label>
+      <input type="file" id="upImageFile" accept="image/png,image/jpeg,image/webp,image/gif">
+      <small class="muted">Até 600 KB. A imagem será incorporada à mensagem.</small>
+    </div>
+    <div class="field field--full">
+      <label for="upImageAlt">Descrição da imagem (acessibilidade)</label>
+      <input type="text" id="upImageAlt" placeholder="Descreva brevemente a imagem">
+    </div>
+    <div class="inline-form__actions">
+      <button type="submit" class="btn btn--accent btn--sm">Publicar atualização</button>
+    </div>
+    <div id="addUpdateMsg" class="form-msg" style="grid-column:1/-1"></div>
+  </form>
+</section>
+
+<!-- Solicitações de cadastro -->
+<section class="panel-section" data-panel="solicitacoes">
+  <div class="panel-section__head">
+    <div>
+      <div class="panel-section__title">Solicitações de acesso</div>
+      <div class="panel-section__desc">Pedidos de cadastro enviados pela tela pública. Aprovar cria o usuário automaticamente.</div>
+    </div>
+  </div>
+  <div id="signupRequestsWrap"><div class="skeleton-loading">Carregando…</div></div>
+</section>
+
+<!-- Ferramentas / Documentos / Manuais compartilham o mesmo template -->
+<section class="panel-section" data-panel="ferramenta">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Ferramentas</div>
+            <div class="panel-section__desc">Itens exibidos no submenu FERRAMENTAS do menu superior.</div>
+          </div>
+        </div>
+        <div class="table-wrap" data-table="ferramenta"></div>
+      </section>
+
+      <section class="panel-section" data-panel="documento">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Documentos Úteis</div>
+            <div class="panel-section__desc">Itens exibidos na página Documentos Úteis.</div>
+          </div>
+        </div>
+        <div class="table-wrap" data-table="documento"></div>
+      </section>
+
+      <section class="panel-section" data-panel="manual">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Manuais de Uso</div>
+            <div class="panel-section__desc">Itens exibidos na página Manuais de Uso.</div>
+          </div>
+        </div>
+        <div class="table-wrap" data-table="manual"></div>
+      </section>
+
+      <!-- Relatórios -->
+      <section class="panel-section" data-panel="relatorios">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Grupos de acesso</div>
+            <div class="panel-section__desc">Crie grupos (ex.: Enfermagem, Gestão) e escolha quais relatórios cada grupo pode ver. Depois, atribua usuários aos grupos na aba Usuários.</div>
+          </div>
+        </div>
+        <div id="reportGroupsWrap"><div class="skeleton-loading">Carregando…</div></div>
+
+        <form id="addGroupForm" class="inline-form">
+          <div class="field">
+            <label for="grpName">Nome do grupo</label>
+            <input type="text" id="grpName" required placeholder="Ex.: Enfermagem">
+          </div>
+          <div class="field field--full">
+            <label for="grpDesc">Descrição (opcional)</label>
+            <input type="text" id="grpDesc">
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Criar grupo</button>
+          </div>
+          <div id="addGroupMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+
+        <div class="panel-section__head" style="margin-top:34px">
+          <div>
+            <div class="panel-section__title">Relatórios cadastrados</div>
+            <div class="panel-section__desc">Link do relatório do Data Studio (ou outro serviço) e como ele deve abrir para quem tiver acesso.</div>
+          </div>
+        </div>
+        <div id="reportsWrap"><div class="skeleton-loading">Carregando…</div></div>
+
+        <form id="addReportForm" class="inline-form">
+          <div class="field field--full">
+            <label for="repTitle">Título</label>
+            <input type="text" id="repTitle" required>
+          </div>
+          <div class="field field--full">
+            <label for="repDesc">Descrição (opcional)</label>
+            <input type="text" id="repDesc">
+          </div>
+          <div class="field field--full">
+            <label for="repUrl">Link do relatório (embed do Data Studio ou outro link)</label>
+            <input type="url" id="repUrl" required placeholder="https://">
+          </div>
+          <div class="field">
+            <label for="repMode">Como abrir</label>
+            <select id="repMode">
+              <option value="embed">Incorporado no portal</option>
+              <option value="new_tab">Nova aba</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="repOrder">Ordem de exibição</label>
+            <input type="number" id="repOrder" value="1">
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Adicionar relatório</button>
+          </div>
+          <div id="addReportMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+      </section>
+
+      <!-- Unidades -->
+      <section class="panel-section" data-panel="unidades">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Unidades de saúde</div>
+            <div class="panel-section__desc">Unidades disponíveis no Receituário e nas telas de atribuição da aba Usuários. Cadastrar, editar ou excluir é restrito ao Super Administrador; unidades inativas somem dos seletores, mas ficam preservadas no histórico.</div>
+          </div>
+        </div>
+        <div id="unidadesTableWrap"><div class="skeleton-loading">Carregando…</div></div>
+
+        <form id="addUnidadeForm" class="inline-form" style="display:none">
+          <div class="field field--full">
+            <label for="uniNome">Nome da unidade</label>
+            <input type="text" id="uniNome" required placeholder="Ex: UBS Jardim das Flores">
+          </div>
+          <div class="field">
+            <label for="uniCnes">CNES</label>
+            <input type="text" id="uniCnes" placeholder="Ex: 1234567">
+          </div>
+          <div class="field">
+            <label for="uniTel">Telefone</label>
+            <input type="text" id="uniTel" placeholder="Ex: (11) 4446-0100">
+          </div>
+          <div class="field field--full">
+            <label for="uniEndereco">Endereço</label>
+            <input type="text" id="uniEndereco" placeholder="Ex: Rua Exemplo, 100 - Bairro, Cajamar/SP">
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Cadastrar unidade</button>
+          </div>
+          <div id="addUnidadeMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+      </section>
+
+
+      <!-- Ouvidoria IA -->
+      <section class="panel-section" data-panel="ouvidoria">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Ouvidoria — distribuição por IA</div>
+            <div class="panel-section__desc">Fonte central de profissionais, regras especiais e fallback consumida pela extensão OuvidorSUS. Nenhum conteúdo de manifestação é armazenado aqui.</div>
+          </div>
+        </div>
+
+        <div class="panel-section__head" style="margin-top:10px">
+          <div>
+            <div class="panel-section__title" style="font-size:17px">Profissionais</div>
+            <div class="panel-section__desc">O código técnico é estável no Portal. Para atribuir no OuvidorSUS, a extensão resolve o nome exato habilitado e usa o identificador exigido pelo próprio sistema apenas durante a operação.</div>
+          </div>
+        </div>
+        <div id="ouvidoriaProfissionaisWrap"><div class="skeleton-loading">Carregando…</div></div>
+        <form id="addOuvidoriaProfissionalForm" class="inline-form">
+          <div class="field">
+            <label for="ovProfCodigo">Código técnico</label>
+            <input type="text" id="ovProfCodigo" required pattern="[a-z0-9_-]{2,40}" placeholder="ex.: beatriz">
+          </div>
+          <div class="field">
+            <label for="ovProfNome">Nome no Portal</label>
+            <input type="text" id="ovProfNome" required placeholder="Ex.: Beatriz">
+          </div>
+          <div class="field field--full">
+            <label for="ovProfNomeSus">Nome exato no OuvidorSUS</label>
+            <input type="text" id="ovProfNomeSus" placeholder="Preencher exatamente como aparece na lista de usuários habilitados">
+          </div>
+          <div class="field">
+            <label for="ovProfEmail">E-mail</label>
+            <input type="email" id="ovProfEmail" placeholder="profissional@cajamar.sp.gov.br">
+          </div>
+          <div class="field">
+            <label for="ovProfObs">Observação / função</label>
+            <input type="text" id="ovProfObs" placeholder="Ex.: apoio técnico de Odontologia">
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Adicionar profissional</button>
+          </div>
+          <div id="addOuvidoriaProfissionalMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+
+        <div class="panel-section__head" style="margin-top:34px">
+          <div>
+            <div class="panel-section__title" style="font-size:17px">Regras de distribuição</div>
+            <div class="panel-section__desc">A menor prioridade numérica é avaliada primeiro. Ex.: Odontologia técnica (10) antes da regra geral de Odontologia (20).</div>
+          </div>
+        </div>
+        <div id="ouvidoriaRegrasWrap"><div class="skeleton-loading">Carregando…</div></div>
+        <form id="addOuvidoriaRegraForm" class="inline-form">
+          <div class="field">
+            <label for="ovRegraTitulo">Título</label>
+            <input type="text" id="ovRegraTitulo" required placeholder="Ex.: Odontologia — demanda técnica">
+          </div>
+          <div class="field">
+            <label for="ovRegraDivisao">Divisão</label>
+            <input type="text" id="ovRegraDivisao" required placeholder="Ex.: Odontologia">
+          </div>
+          <div class="field">
+            <label for="ovRegraSubtipo">Subtipo</label>
+            <input type="text" id="ovRegraSubtipo" value="geral" required placeholder="geral / tecnica / ...">
+          </div>
+          <div class="field">
+            <label for="ovRegraPrioridade">Prioridade</label>
+            <input type="number" id="ovRegraPrioridade" min="1" max="9999" value="100" required>
+          </div>
+          <div class="field">
+            <label for="ovRegraProfissional">Responsável</label>
+            <select id="ovRegraProfissional" required><option value="">— selecione —</option></select>
+          </div>
+          <div class="field field--full">
+            <label for="ovRegraDescricao">Critério / orientação</label>
+            <textarea id="ovRegraDescricao" rows="2" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;resize:vertical" placeholder="Descreva quando esta regra deve ser aplicada"></textarea>
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Adicionar regra</button>
+          </div>
+          <div id="addOuvidoriaRegraMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+
+        <div class="panel-section__head" style="margin-top:34px">
+          <div>
+            <div class="panel-section__title" style="font-size:17px">Dúvida / fallback</div>
+            <div class="panel-section__desc">Quando a classificação não atingir o nível mínimo de confiança, a extensão usa esta ordem de apoio em vez de adivinhar um responsável.</div>
+          </div>
+        </div>
+        <form id="ouvidoriaConfigForm" class="inline-form">
+          <div class="field">
+            <label for="ovConfidence">Confiança mínima para distribuição automática (%)</label>
+            <input type="number" id="ovConfidence" min="0" max="100" step="1" value="80" required>
+          </div>
+          <div class="field">
+            <label for="ovFallback1">1º fallback</label>
+            <select id="ovFallback1"><option value="">— nenhum —</option></select>
+          </div>
+          <div class="field">
+            <label for="ovFallback2">2º fallback</label>
+            <select id="ovFallback2"><option value="">— nenhum —</option></select>
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Salvar configuração</button>
+          </div>
+          <div id="ouvidoriaConfigMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+
+        <div class="empty-state" style="margin-top:28px;text-align:left">
+          <strong>Integração com a extensão</strong><br>
+          A extensão consumirá <code>/api/ouvidoria/extension-config</code> em modo somente leitura. Configure no Cloudflare Pages a variável secreta <code>OUVIDORIA_EXTENSION_TOKEN</code>. O banco do Portal guarda apenas esta configuração administrativa — não guarda manifestações.
+        </div>
+      </section>
+
+      <!-- Perfis de acesso -->
+      <section class="panel-section" data-panel="perfis">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Perfis de acesso</div>
+            <div class="panel-section__desc">Define o "teto" de funcionalidades permitido para cada papel. O card de Configurações de cada profissional (aba Usuários) nunca pode ir além do que estiver marcado aqui. O Super Administrador sempre tem acesso a tudo e não aparece nesta lista.</div>
+          </div>
+        </div>
+        <div id="rolePermsWrap"><div class="skeleton-loading">Carregando…</div></div>
+      </section>
+
+      <!-- Usuários -->
+      <section class="panel-section" data-panel="usuarios">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Usuários</div>
+            <div class="panel-section__desc">Pessoas com acesso ao portal.</div>
+          </div>
+        </div>
+        <div class="admin-list-controls" id="usersListControls" style="display:grid;grid-template-columns:minmax(180px,1.5fr) minmax(180px,1fr) minmax(150px,.8fr) minmax(130px,.7fr) auto;gap:10px;align-items:end;margin:0 0 14px">
+          <div class="field"><label for="usersSearch">Buscar</label><input id="usersSearch" type="search" placeholder="Nome ou usuário"></div>
+          <div class="field"><label for="usersUnitFilter">Unidade</label><select id="usersUnitFilter"><option value="">Todas as unidades</option></select></div>
+          <div class="field"><label for="usersRoleFilter">Função</label><select id="usersRoleFilter"><option value="">Todas</option><option value="user">Usuário</option><option value="admin_unidade">Administrador de Unidade</option><option value="admin">Administrador</option><option value="super_admin">Super Administrador</option></select></div>
+          <div class="field"><label for="usersStatusFilter">Status</label><select id="usersStatusFilter"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
+          <button type="button" id="usersClearFilters" class="btn btn--outline btn--sm">Limpar filtros</button>
+        </div>
+        <div id="usersTableWrap"><div class="skeleton-loading">Carregando usuários…</div></div>
+        <div id="usersPagination" class="admin-pagination" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:12px 0 22px"></div>
+
+        <form id="addUserForm" class="inline-form">
+          <div class="field">
+            <label for="uName">Nome completo</label>
+            <input type="text" id="uName" required>
+          </div>
+          <div class="field">
+            <label for="uUsername">Usuário (login)</label>
+            <input type="text" id="uUsername" required pattern="[a-z0-9._-]{3,32}" title="Letras minúsculas, números, ponto, hífen ou underline">
+          </div>
+          <div class="field">
+            <label for="uUnidade">Unidade de lotação</label>
+            <select id="uUnidade"><option value="">— selecione —</option></select>
+          </div>
+          <div class="field">
+            <label for="uPassword">Senha provisória</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="uPassword" required minlength="8" style="flex:1">
+              <button type="button" id="genTempPasswordNewUser" class="btn btn--outline btn--sm" style="white-space:nowrap">Gerar</button>
+            </div>
+          </div>
+          <div class="field field--full">
+            <label for="uRole">Papel</label>
+            <select id="uRole" style="max-width:320px">
+              <option value="user">Usuário</option>
+              <option value="admin">Administrador</option>
+              <option value="super_admin">Super Administrador</option>
+            </select>
+          </div>
+          <div class="inline-form__actions">
+            <button type="submit" class="btn btn--accent btn--sm">Adicionar usuário</button>
+          </div>
+          <p class="muted" style="grid-column:1/-1;font-size:13px;margin:0">O usuário será obrigado a trocar essa senha provisória no primeiro login.</p>
+          <div id="addUserMsg" class="form-msg" style="grid-column:1/-1"></div>
+        </form>
+      </section>
+
+      <!-- Auditoria -->
+      <section class="panel-section" data-panel="auditoria">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Auditoria</div>
+            <div class="panel-section__desc">Últimas 100 ações administrativas (criação/edição/exclusão de usuários, links, permissões e solicitações). Visível só para o Super Administrador.</div>
+          </div>
+        </div>
+        <div id="auditLogWrap"><div class="skeleton-loading">Carregando…</div></div>
+      </section>
+
+      <!-- Minha conta -->
+      <section class="panel-section" data-panel="conta">
+        <div class="panel-section__head">
+          <div>
+            <div class="panel-section__title">Minha Conta</div>
+            <div class="panel-section__desc">Altere sua própria senha de acesso.</div>
+          </div>
+        </div>
+        <form id="changePasswordForm" style="max-width:340px">
+          <div class="field">
+            <label for="curPass">Senha atual</label>
+            <input type="password" id="curPass" required>
+          </div>
+          <div class="field">
+            <label for="newPass">Nova senha</label>
+            <input type="password" id="newPass" required minlength="8">
+          </div>
+          <div id="changePassMsg" class="form-msg"></div>
+          <button type="submit" class="btn btn--accent">Salvar nova senha</button>
+        </form>
+      </section>
+
+      <section class="panel-section" data-panel="chat-config"><div class="panel-section__head"><div><div class="panel-section__title">Chat e suporte</div><div class="panel-section__desc">Prazos de retenção compartilhados pelo Apoio e eMulti.</div></div></div><form id="chatConfigForm" class="inline-form"><div class="field"><label>Comunicação interna (dias)</label><input id="internalRetention" type="number" min="1" max="3650" value="30"></div><div class="field"><label>Suporte (dias)</label><input id="supportRetention" type="number" min="1" max="3650" value="30"></div><div class="inline-form__actions"><button class="btn btn--accent" type="submit">Salvar prazos</button></div><div id="chatConfigMsg" class="form-msg"></div></form></section>
+
+    </div>
+  
+
+
+</div>
+</main>
+
+<!-- Modal genérico de edição -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ workers_dev = true
 preview_urls = true
 
 [assets]
-directory = "."
+directory = "./public"
 binding = "ASSETS"
 run_worker_first = true
 not_found_handling = "404-page"
@@ -13,7 +13,7 @@ not_found_handling = "404-page"
 [[d1_databases]]
 binding = "DB"
 database_name = "portal-saude-db"
-database_id = "d20e8935-68c2-47cb-8a88-69162fb9feaa"
+database_id = "b81dca90-069e-43c1-b6e0-1c1d5c44aab9"
 
 # Se Apoio e eMulti futuramente usarem subdomínios de um mesmo domínio
 # personalizado, COOKIE_DOMAIN pode ser definido como variável do Worker.
