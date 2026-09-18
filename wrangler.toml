@@ -13,7 +13,7 @@ not_found_handling = "404-page"
 [[d1_databases]]
 binding = "DB"
 database_name = "portal-saude-db"
-database_id = "b81dca90-069e-43c1-b6e0-1c1d5c44aab9"
+database_id = "4467670b-0e48-490a-8d56-fb4ad4cf6bce"
 
 # Se Apoio e eMulti futuramente usarem subdomínios de um mesmo domínio
 # personalizado, COOKIE_DOMAIN pode ser definido como variável do Worker.
