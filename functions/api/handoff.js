@@ -1,8 +1,6 @@
-// POST /api/handoff -> gera um código de uso único (60s de validade) que
-// carrega a identidade do usuário logado para outro projeto Cloudflare
-// Pages que lê o MESMO banco (env.DB). Nunca carrega senha nem o token de
-// sessão em si — só permite que o outro site crie a PRÓPRIA sessão local
-// para o mesmo user_id, depois de validar o código uma única vez.
+// POST /api/handoff -> gera um código de uso único (60s de validade) para autenticação entre aplicações apartadas. O eMulti NÃO lê este D1.
+// O token é trocado por identidade no endpoint servidor-a-servidor
+// /api/handoff/consume e o eMulti cria sua própria sessão no próprio banco.
 // Ver migration_regulacao_setup.sql (tabela handoff_tokens) e o
 // functions/_middleware.js do projeto regulacao-vagas-cajamar, que consome
 // este código.

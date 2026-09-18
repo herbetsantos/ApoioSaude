@@ -1,5 +1,11 @@
 # Apoio v2.11.0
 
+## 2.11.3 — Novo D1 definitivo
+
+- Binding `DB` atualizado para o `portal-saude-db` da conta Cloudflare definitiva.
+- Database ID: `4467670b-0e48-490a-8d56-fb4ad4cf6bce`.
+- Mantida a estrutura consolidada já desenvolvida; nenhuma credencial é criada automaticamente.
+
 - Migração de Cloudflare Pages para **Cloudflare Workers + Static Assets**.
 - Pages Functions compiladas para um único Worker durante o build.
 - Mantido o binding `DB` para o `portal-saude-db`.

@@ -4,7 +4,7 @@ import { FEATURES, isFeatureKey } from './_permissions.js';
 // super_admin não entra nessa lista: sempre tem tudo liberado e não é editável.
 const ROLES = ['user', 'admin_unidade', 'admin'];
 const ROLE_SET = new Set(ROLES);
-const ROLE_FEATURES = FEATURES.filter((f) => f.key !== 'regulacao_vagas');
+const ROLE_FEATURES = FEATURES;
 
 // GET: qualquer papel do painel admin pode ver o teto vigente (é usado para
 // desenhar o card de Configurações do profissional). Só o Super Admin edita.
