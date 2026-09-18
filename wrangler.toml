@@ -1,0 +1,21 @@
+name = "apoio"
+main = ".worker/index.js"
+compatibility_date = "2026-09-18"
+workers_dev = true
+preview_urls = true
+
+[assets]
+directory = "."
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "404-page"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portal-saude-db"
+database_id = "d20e8935-68c2-47cb-8a88-69162fb9feaa"
+
+# Se Apoio e eMulti futuramente usarem subdomínios de um mesmo domínio
+# personalizado, COOKIE_DOMAIN pode ser definido como variável do Worker.
+# [vars]
+# COOKIE_DOMAIN = ".seudominio.gov.br"

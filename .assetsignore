@@ -1,0 +1,15 @@
+functions/**
+.worker/**
+database/**
+node_modules/**
+.git/**
+.github/**
+package.json
+package-lock.json
+wrangler.toml
+README.md
+INSTALL_REGULACAO.md
+INTEGRACAO_OUVIDORIA.md
+NOVIDADES.md
+.assetsignore
+**/.DS_Store

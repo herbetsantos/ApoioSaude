@@ -1,0 +1,13 @@
+{
+  "name": "apoio",
+  "private": true,
+  "version": "2.11.0",
+  "scripts": {
+    "build": "wrangler pages functions build --outdir=.worker",
+    "deploy": "npm run build && wrangler deploy",
+    "dev": "npm run build && wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
