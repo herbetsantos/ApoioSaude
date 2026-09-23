@@ -195,9 +195,9 @@
     //  (b) URLs https cujo host esteja na allowlist abaixo.
     // Edite ALLOWED_NEXT_HOSTS ao publicar projetos separados que
     // compartilham este login (ex.: Regulação de Vagas). Troque pelo
-    // domínio *.pages.dev real do projeto depois do deploy.
+    // domínio Worker real do projeto depois do deploy.
     const ALLOWED_NEXT_HOSTS = [
-      'emulti.pages.dev',
+      'regulacao.apoiosaude.workers.dev',
     ];
     function safeNextUrl(raw) {
       if (!raw) return '/portal.html';
@@ -212,8 +212,8 @@
     // Se o destino final é um domínio externo confiável (outro projeto
     // Pages, mesmo banco), gera um código de repasse de uso único e anexa
     // na URL antes de navegar — é assim que a sessão "atravessa" pro outro
-    // domínio, já que cookie de sessão não é enviado entre *.pages.dev
-    // diferentes. Se o destino é interno (começa com "/"), navega direto,
+    // domínio, já que o cookie de sessão não é compartilhado entre Workers
+    // em hosts diferentes. Se o destino é interno (começa com "/"), navega direto,
     // sem nenhuma chamada extra.
     async function goToNext(url) {
       if (url.startsWith('/')) { window.location.href = url; return; }
