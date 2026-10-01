@@ -196,9 +196,11 @@
     // Edite ALLOWED_NEXT_HOSTS ao publicar projetos separados que
     // compartilham este login (ex.: Regulação de Vagas). Troque pelo
     // domínio Worker real do projeto depois do deploy.
-    const ALLOWED_NEXT_HOSTS = [
-      'regulacao.apoiosaude.workers.dev',
-    ];
+const ALLOWED_NEXT_HOSTS = [
+  'regulacao.apoiosaude.workers.dev',
+  'olharemulti.apoiosaude.workers.dev',
+];
+
     function safeNextUrl(raw) {
       if (!raw) return '/portal.html';
       if (raw.startsWith('/')) return raw;

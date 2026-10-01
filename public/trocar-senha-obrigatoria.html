@@ -41,9 +41,11 @@
 
   <script>
     // Para onde ir depois de trocar a senha (ver mesma lógica em login.html).
-    const ALLOWED_NEXT_HOSTS = [
-      'emulti.pages.dev',
-    ];
+const ALLOWED_NEXT_HOSTS = [
+  'emulti.pages.dev',
+  'regulacao.apoiosaude.workers.dev',
+  'olharemulti.apoiosaude.workers.dev',
+];
     function safeNextUrl(raw) {
       if (!raw) return '/portal.html';
       if (raw.startsWith('/')) return raw;
