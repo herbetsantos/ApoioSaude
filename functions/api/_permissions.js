@@ -6,7 +6,7 @@ export const FEATURES = [
   { key: 'malotes', label: 'Malotes e Remessas' },
   { key: 'facilitawhats', label: 'FacilitaWhats' },
   { key: 'mensageiro_esus', label: 'Mensageiro eSUS' },
-  { key: 'agenda', label: 'Agenda de Contatos' },
+  { key: 'agenda', label: 'Contatos' },
   { key: 'documentos', label: 'Documentos Úteis' },
   { key: 'manuais', label: 'Manuais de Uso' },
   { key: 'relatorios', label: 'Relatórios' },

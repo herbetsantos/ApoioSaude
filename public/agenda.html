@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="/js/theme.js"></script>
-<title>Agenda — Apoio</title>
+<title>Contatos — Apoio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
@@ -40,8 +40,8 @@
 
 <main class="page">
   <div class="page__header">
-    <div class="eyebrow">Contatos internos</div>
-    <h1 class="page__title">Agenda</h1>
+    <div class="eyebrow">Diretório</div>
+    <h1 class="page__title">Contatos</h1>
     <p class="page__subtitle">Ramais, e-mails e lotação dos profissionais da Secretaria de Saúde.</p>
   </div>
 
@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <div id="listArea"><div class="skeleton-loading">Carregando agenda…</div></div>
+  <div id="listArea"><div class="skeleton-loading">Carregando contatos…</div></div>
 </main>
 
 <div class="modal-backdrop" id="modalBg">
@@ -195,10 +195,10 @@
   }
   $('exportBtn').addEventListener('click', () => {
     if (!rows.length) return alert('Não há contatos para exportar.');
-    download('agenda.csv', [CSV_HEAD.map(csvCell).join(';'), ...rows.map((c) =>
+    download('contatos.csv', [CSV_HEAD.map(csvCell).join(';'), ...rows.map((c) =>
       [c.nome, c.cargo, c.ramal, c.celular, c.email, c.secretaria, c.divisao, c.departamento, c.etiquetas.join(', ')].map(csvCell).join(';'))]);
   });
-  $('modelBtn').addEventListener('click', () => download('modelo-agenda.csv', [
+  $('modelBtn').addEventListener('click', () => download('modelo-contatos.csv', [
     CSV_HEAD.map(csvCell).join(';'),
     ['Maria da Silva', 'Enfermeira', '2201', '(11) 99999-0000', 'maria@exemplo.gov.br', 'Saúde', 'Vigilância', 'Epidemiologia', 'Dengue, Vacinação'].map(csvCell).join(';')]));
 
@@ -300,7 +300,7 @@
     if (ed) openModal(all.find((c) => c.id === Number(ed.dataset.edit)));
     if (del) {
       const c = all.find((x) => x.id === Number(del.dataset.del));
-      if (!confirm(`Excluir "${c.nome}" da agenda?`)) return;
+      if (!confirm(`Excluir "${c.nome}" dos contatos?`)) return;
       try { await api(`/api/agenda/${c.id}`, { method: 'DELETE' }); await load(); } catch (err) { alert(err.message); }
     }
   });

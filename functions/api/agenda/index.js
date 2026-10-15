@@ -40,7 +40,7 @@ export async function onRequestGet({ request, env }) {
   const { user, error } = await requireAuth(request, env);
   if (error) return error;
   const perms = await getUserPermissions(env, user);
-  if (!perms.agenda) return json({ error: 'Sem acesso à Agenda.' }, 403);
+  if (!perms.agenda) return json({ error: 'Sem acesso a Contatos.' }, 403);
 
   const where = isAdmin(user) ? '' : 'WHERE ativo = 1';
   const { results } = await env.DB.prepare(

@@ -1,8 +1,8 @@
 # Apoio v2.12.0
 
-## 2.12.0 — Agenda de contatos
+## 2.12.0 — Contatos (diretório de profissionais)
 
-- Nova página **Agenda** (`/agenda.html`): nome, cargo, ramal, celular, e-mail, secretaria, divisão, departamento e etiquetas de assuntos.
+- Nova página **Contatos** (`/agenda.html`): nome, cargo, ramal, celular, e-mail, secretaria, divisão, departamento e etiquetas de assuntos.
 - Pesquisa livre (sem acento/maiúscula) e filtros por secretaria, divisão, departamento e assunto.
 - Administradores cadastram, editam e excluem contatos; importação em massa por CSV (ignora duplicados).
 - Exportação para CSV (respeita os filtros), impressão limpa e contatos favoritos por navegador.
@@ -10,7 +10,7 @@
 - `public/` passa a ser a única pasta de arquivos estáticos; cópias antigas na raiz foram removidas. A busca por apelidos de unidades de `guiasmalotes.html` foi preservada.
 - Cabeçalho CSP ajustado para permitir a fonte Montserrat (Google Fonts).
 
-## Banco de dados da Agenda
+## Banco de dados de Contatos
 - Instalação nova: `database/migration_agenda.sql`.
 - Quem já aplicou versões anteriores: `migration_agenda_etiquetas.sql` e/ou `migration_agenda_cargo_celular.sql`, uma única vez cada, conforme o que faltar.
 

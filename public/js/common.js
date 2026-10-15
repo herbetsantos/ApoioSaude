@@ -52,7 +52,7 @@ const TOPBAR_HTML = `
           <div class="submenu" id="ferramentasMenu"></div>
         </div>
         <div class="nav__item">
-          <a class="nav__link" data-nav="agenda" href="/agenda.html"><span class="label-text">AGENDA</span></a>
+          <a class="nav__link" data-nav="agenda" href="/agenda.html"><span class="label-text">CONTATOS</span></a>
         </div>
         <div class="nav__item">
           <a class="nav__link" data-nav="documentos" href="/documentos.html"><span class="label-text">DOCUMENTOS ÚTEIS</span></a>
