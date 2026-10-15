@@ -18,6 +18,8 @@ const PROTECTED = {
   '/guiasmalotes.html': 'malotes',
   '/facilitawhats': 'facilitawhats',
   '/facilitawhats.html': 'facilitawhats',
+  '/agenda': 'agenda',
+  '/agenda.html': 'agenda',
   '/documentos': 'documentos',
   '/documentos.html': 'documentos',
   '/manuais': 'manuais',

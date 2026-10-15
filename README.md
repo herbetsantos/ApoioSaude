@@ -12,6 +12,12 @@ Intranet com login/senha para disponibilizar Ferramentas, Documentos Úteis e Ma
 à equipe da Secretaria de Saúde de Cajamar. Feito para rodar 100% no Cloudflare:
 **Cloudflare Pages** (frontend + Functions) + **Cloudflare D1** (banco de dados, usuários e conteúdo).
 
+> **Atenção:** o deploy atual é em **Cloudflare Workers** (veja `WORKERS_MIGRATION.md`). As seções 2 a 5 abaixo descrevem o deploy antigo em Pages e ficam como referência histórica. Os arquivos estáticos ficam apenas em `public/`.
+
+## Agenda de contatos
+
+Página `/agenda.html` (permissão `agenda`). Para instalar, rode `database/migration_agenda.sql` no D1. Administradores gerenciam os contatos na própria página (inclui importação por CSV: colunas Nome; Cargo; Ramal; Celular; E-mail; Secretaria; Divisão; Departamento; Assuntos).
+
 ## Estrutura do projeto
 
 ```

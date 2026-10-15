@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/js/theme.js"></script>
+<title>Agenda — Apoio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/theme.css">
+<style>
+  .ag-toolbar { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap:12px; align-items:end; margin-bottom:12px; }
+  .ag-toolbar .field { margin-bottom:0; }
+  .ag-bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; color:var(--muted); font-size:13.5px; }
+  .ag-bar__left, .ag-bar__right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ag-actions { white-space:nowrap; text-align:right; }
+  .ag-actions .btn { margin-left:6px; }
+  .ag-link { color:var(--primary); text-decoration:none; font-weight:600; }
+  .ag-link:hover { text-decoration:underline; }
+  .ag-sub { display:block; color:var(--muted); font-size:12.5px; font-weight:400; }
+  .ag-star { background:none; border:0; cursor:pointer; font-size:18px; line-height:1; color:#c5ccd8; padding:2px 4px; }
+  .ag-star.is-on { color:#e8a317; }
+  .ag-tag { display:inline-block; margin:2px 4px 2px 0; padding:3px 10px; border:0; border-radius:999px; background:#e6ecfa; color:var(--primary); font:600 12px inherit; font-family:inherit; cursor:pointer; }
+  .ag-tag:hover { filter:brightness(0.95); }
+  .ag-chips { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; }
+  .ag-chips .ag-tag::after { content:' ×'; opacity:.65; }
+  .ag-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+  @media (max-width: 860px) { .ag-toolbar { grid-template-columns:1fr 1fr; } .ag-toolbar .field:first-child { grid-column:1/-1; } .ag-grid2 { grid-template-columns:1fr; } }
+  @media print {
+    #app-topbar, .ag-toolbar, .ag-bar, .ag-noprint, .modal-backdrop { display:none !important; }
+    .ag-tag { background:none; border:1px solid #999; color:#000; }
+    .page__header { margin-bottom:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app-topbar"></div>
+
+<main class="page">
+  <div class="page__header">
+    <div class="eyebrow">Contatos internos</div>
+    <h1 class="page__title">Agenda</h1>
+    <p class="page__subtitle">Ramais, e-mails e lotação dos profissionais da Secretaria de Saúde.</p>
+  </div>
+
+  <div class="ag-toolbar">
+    <div class="field"><label for="q">Pesquisar</label><input id="q" type="search" placeholder="Nome, ramal, e-mail, assunto…" autocomplete="off"></div>
+    <div class="field"><label for="fSec">Secretaria</label><select id="fSec"></select></div>
+    <div class="field"><label for="fDiv">Divisão</label><select id="fDiv"></select></div>
+    <div class="field"><label for="fDep">Departamento</label><select id="fDep"></select></div>
+    <div class="field"><label for="fTag">Assunto</label><select id="fTag"></select></div>
+    <button class="btn btn--outline" id="clearBtn" type="button">Limpar</button>
+  </div>
+
+  <div class="ag-bar">
+    <div class="ag-bar__left">
+      <span id="count"></span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input id="fFav" type="checkbox"> Só favoritos ★</label>
+    </div>
+    <div class="ag-bar__right">
+      <button class="btn btn--outline btn--sm" id="exportBtn" type="button">Exportar CSV</button>
+      <button class="btn btn--outline btn--sm" id="printBtn" type="button">Imprimir</button>
+      <span id="adminBtns" style="display:none;gap:10px;align-items:center">
+        <button class="btn btn--outline btn--sm" id="modelBtn" type="button">Modelo CSV</button>
+        <button class="btn btn--outline btn--sm" id="importBtn" type="button">Importar CSV</button>
+        <button class="btn btn--accent" id="newBtn" type="button">+ Novo contato</button>
+      </span>
+      <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
+    </div>
+  </div>
+
+  <div id="listArea"><div class="skeleton-loading">Carregando agenda…</div></div>
+</main>
+
+<div class="modal-backdrop" id="modalBg">
+  <div class="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h3 id="mTitle">Novo contato</h3>
+    <p class="muted">Preencha os dados do profissional.</p>
+    <div class="field"><label for="mNome">Nome *</label><input id="mNome" maxlength="120"></div>
+    <div class="ag-grid2">
+      <div class="field"><label for="mCargo">Cargo / função</label><input id="mCargo" maxlength="120"></div>
+      <div class="field"><label for="mEmail">E-mail</label><input id="mEmail" type="email" maxlength="160"></div>
+      <div class="field"><label for="mRamal">Ramal</label><input id="mRamal" maxlength="20" inputmode="tel"></div>
+      <div class="field"><label for="mCel">Celular / WhatsApp</label><input id="mCel" maxlength="30" inputmode="tel"></div>
+      <div class="field"><label for="mSec">Secretaria</label><input id="mSec" list="dlSec" maxlength="120"></div>
+      <div class="field"><label for="mDiv">Divisão</label><input id="mDiv" list="dlDiv" maxlength="120"></div>
+    </div>
+    <div class="field"><label for="mDep">Departamento</label><input id="mDep" list="dlDep" maxlength="120"></div>
+    <div class="field"><label for="mTagIn">Assuntos tratados (etiquetas)</label>
+      <div class="ag-chips" id="mChips"></div>
+      <input id="mTagIn" list="dlTag" maxlength="40" placeholder="Digite um assunto e pressione Enter">
+    </div>
+    <div class="field"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0"><input id="mAtivo" type="checkbox" checked style="width:auto"> Contato ativo (visível na agenda)</label></div>
+    <datalist id="dlTag"></datalist><datalist id="dlSec"></datalist><datalist id="dlDiv"></datalist><datalist id="dlDep"></datalist>
+    <div class="form-msg" id="mMsg"></div>
+    <div class="modal__actions">
+      <button class="btn btn--outline" id="mCancel" type="button">Cancelar</button>
+      <button class="btn btn--accent" id="mSave" type="button">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+(async () => {
+  const user = await initPortalChrome('agenda');
+  if (!user) return;
+
+  const $ = (id) => document.getElementById(id);
+  const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  let all = [], rows = [], canEdit = false, editingId = null, modalTags = [];
+
+  // Favoritos ficam salvos neste navegador, por usuário.
+  const FAV_KEY = `apoio_agenda_fav_${user.id}`;
+  let favs = new Set();
+  try { favs = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); } catch { /* sem armazenamento */ }
+  const saveFavs = () => { try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch { /* ignora */ } };
+
+  async function api(url, opts) {
+    const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Erro inesperado.');
+    return data;
+  }
+
+  const uniq = (key) => [...new Set(all.flatMap((c) => (key === 'etiquetas' ? c.etiquetas : [c[key]])).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const fmtDate = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+
+  function fillSelect(id, key, label) {
+    const sel = $(id), cur = sel.value, opts = uniq(key);
+    sel.innerHTML = `<option value="">${label}</option>` + opts.map((v) => `<option>${escapeHtml(v)}</option>`).join('');
+    sel.value = opts.includes(cur) ? cur : '';
+  }
+  const fillDatalist = (id, key) => { $(id).innerHTML = uniq(key).map((v) => `<option value="${escapeAttr(v)}">`).join(''); };
+  function fillFilters() {
+    fillSelect('fSec', 'secretaria', 'Todas'); fillSelect('fDiv', 'divisao', 'Todas');
+    fillSelect('fDep', 'departamento', 'Todos'); fillSelect('fTag', 'etiquetas', 'Todos');
+    fillDatalist('dlSec', 'secretaria'); fillDatalist('dlDiv', 'divisao'); fillDatalist('dlDep', 'departamento'); fillDatalist('dlTag', 'etiquetas');
+  }
+
+  function render() {
+    const q = norm($('q').value).split(/\s+/).filter(Boolean);
+    const sec = $('fSec').value, div = $('fDiv').value, dep = $('fDep').value, tag = $('fTag').value, onlyFav = $('fFav').checked;
+    rows = all.filter((c) =>
+      (!sec || c.secretaria === sec) && (!div || c.divisao === div) && (!dep || c.departamento === dep) &&
+      (!tag || c.etiquetas.includes(tag)) && (!onlyFav || favs.has(c.id)) &&
+      q.every((t) => norm([c.nome, c.cargo, c.ramal, c.celular, c.email, c.divisao, c.departamento, c.secretaria, ...c.etiquetas].join(' ')).includes(t))
+    ).sort((a, b) => (favs.has(b.id) - favs.has(a.id)));   // favoritos primeiro (a ordem por nome é mantida)
+    $('count').textContent = `${rows.length} de ${all.length} contato${all.length === 1 ? '' : 's'}`;
+    const tel = (v) => escapeAttr(v.replace(/[^\d+]/g, ''));
+    $('listArea').innerHTML = rows.length ? `
+      <div class="table-wrap"><table class="data-table"><thead><tr>
+        <th class="ag-noprint"></th><th>Profissional</th><th>Ramal</th><th>E-mail</th><th>Divisão</th><th>Departamento</th><th>Secretaria</th><th>Assuntos</th>${canEdit ? '<th class="ag-noprint"></th>' : ''}
+      </tr></thead><tbody>${rows.map((c) => `<tr>
+        <td class="ag-noprint"><button type="button" class="ag-star${favs.has(c.id) ? ' is-on' : ''}" data-fav="${c.id}" aria-label="Favoritar" title="Favoritar">${favs.has(c.id) ? '★' : '☆'}</button></td>
+        <td><strong>${escapeHtml(c.nome)}</strong>${c.ativo ? '' : ' <span class="badge badge--inactive">Inativo</span>'}
+          ${c.cargo ? `<span class="ag-sub">${escapeHtml(c.cargo)}</span>` : ''}
+          ${fmtDate(c.updated_at) ? `<span class="ag-sub ag-noprint">Atualizado em ${fmtDate(c.updated_at)}</span>` : ''}</td>
+        <td>${c.ramal ? `<a class="ag-link" href="tel:${tel(c.ramal)}">${escapeHtml(c.ramal)}</a>` : '—'}
+          ${c.celular ? `<span class="ag-sub"><a class="ag-link" href="tel:${tel(c.celular)}">${escapeHtml(c.celular)}</a></span>` : ''}</td>
+        <td>${c.email ? `<a class="ag-link" href="mailto:${escapeAttr(c.email)}">${escapeHtml(c.email)}</a>` : '—'}</td>
+        <td>${escapeHtml(c.divisao || '—')}</td><td>${escapeHtml(c.departamento || '—')}</td><td>${escapeHtml(c.secretaria || '—')}</td>
+        <td>${c.etiquetas.map((t) => `<button type="button" class="ag-tag" data-tag="${escapeAttr(t)}" title="Filtrar por este assunto">${escapeHtml(t)}</button>`).join('') || '—'}</td>
+        ${canEdit ? `<td class="ag-actions ag-noprint"><button class="btn btn--outline btn--sm" data-edit="${c.id}">Editar</button><button class="btn btn--danger btn--sm" data-del="${c.id}">Excluir</button></td>` : ''}
+      </tr>`).join('')}</tbody></table></div>`
+      : '<div class="empty-state">Nenhum contato encontrado.</div>';
+  }
+
+  async function load() {
+    try {
+      const data = await api('/api/agenda');
+      all = data.contatos || []; canEdit = !!data.canEdit;
+      $('adminBtns').style.display = canEdit ? 'flex' : 'none';
+      fillFilters(); render();
+    } catch (e) { $('listArea').innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`; }
+  }
+
+  // ── Pesquisa, filtros, favoritos, impressão ──
+  ['q', 'fSec', 'fDiv', 'fDep', 'fTag', 'fFav'].forEach((id) => $(id).addEventListener('input', render));
+  $('clearBtn').addEventListener('click', () => {
+    ['q', 'fSec', 'fDiv', 'fDep', 'fTag'].forEach((id) => { $(id).value = ''; }); $('fFav').checked = false; render(); $('q').focus();
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+
+  // ── CSV (exportar / modelo / importar) ──
+  const CSV_HEAD = ['Nome', 'Cargo', 'Ramal', 'Celular', 'E-mail', 'Secretaria', 'Divisão', 'Departamento', 'Assuntos'];
+  const csvCell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  function download(name, lines) {
+    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });   // BOM: o Excel abre os acentos certos
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  $('exportBtn').addEventListener('click', () => {
+    if (!rows.length) return alert('Não há contatos para exportar.');
+    download('agenda.csv', [CSV_HEAD.map(csvCell).join(';'), ...rows.map((c) =>
+      [c.nome, c.cargo, c.ramal, c.celular, c.email, c.secretaria, c.divisao, c.departamento, c.etiquetas.join(', ')].map(csvCell).join(';'))]);
+  });
+  $('modelBtn').addEventListener('click', () => download('modelo-agenda.csv', [
+    CSV_HEAD.map(csvCell).join(';'),
+    ['Maria da Silva', 'Enfermeira', '2201', '(11) 99999-0000', 'maria@exemplo.gov.br', 'Saúde', 'Vigilância', 'Epidemiologia', 'Dengue, Vacinação'].map(csvCell).join(';')]));
+
+  function parseCsv(text) {
+    text = text.replace(/^\uFEFF/, '');
+    const first = text.split(/\r?\n/, 1)[0];
+    const delim = [';', '\t', ','].map((d) => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+    const out = []; let row = [], cell = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (quoted) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else quoted = false; } else cell += ch; }
+      else if (ch === '"') quoted = true;
+      else if (ch === delim) { row.push(cell); cell = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); cell = ''; if (row.some((c) => c.trim())) out.push(row); row = []; }
+      else cell += ch;
+    }
+    row.push(cell); if (row.some((c) => c.trim())) out.push(row);
+    return out;
+  }
+  const HEADERS = { nome: ['nome', 'profissional'], cargo: ['cargo', 'funcao'], ramal: ['ramal'], celular: ['celular', 'whatsapp', 'telefone'],
+    email: ['email', 'e-mail'], secretaria: ['secretaria'], divisao: ['divisao'], departamento: ['departamento'], etiquetas: ['etiquetas', 'assuntos', 'assunto'] };
+
+  $('importBtn').addEventListener('click', () => { $('csvFile').value = ''; $('csvFile').click(); });
+  $('csvFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const table = parseCsv(await file.text());
+    const head = table.shift() || [];
+    const col = {}; head.forEach((h, i) => { for (const [k, names] of Object.entries(HEADERS)) if (names.includes(norm(h))) col[k] = i; });
+    if (col.nome === undefined) return alert('Não encontrei a coluna "Nome" na primeira linha. Use o botão "Modelo CSV" como base.');
+    const lista = table.map((r) => {
+      const o = {}; for (const k of Object.keys(col)) o[k] = (r[col[k]] || '').trim();
+      if (o.etiquetas) o.etiquetas = o.etiquetas.replace(/\|/g, ',');
+      return o;
+    });
+    if (!lista.length) return alert('A planilha não tem contatos abaixo do cabeçalho.');
+    if (!confirm(`Importar ${lista.length} contato(s) de "${file.name}"?\nContatos que já existem (mesmo e-mail, ou mesmo nome e ramal quando não há e-mail) serão ignorados.`)) return;
+
+    const total = { inseridos: 0, duplicados: 0, invalidos: [] };
+    try {
+      for (let i = 0; i < lista.length; i += 100) {
+        const r = await api('/api/agenda/import', { method: 'POST', body: JSON.stringify({ contatos: lista.slice(i, i + 100) }) });
+        total.inseridos += r.inseridos; total.duplicados += r.duplicados;
+        r.invalidos.forEach((x) => total.invalidos.push(`linha ${i + x.indice + 2}: ${x.motivo}`));
+      }
+    } catch (err) { alert(`Importação interrompida: ${err.message}\nJá importados: ${total.inseridos}.`); }
+    alert(`Importados: ${total.inseridos}\nIgnorados (já existiam): ${total.duplicados}\nCom erro: ${total.invalidos.length}` +
+      (total.invalidos.length ? '\n\n' + total.invalidos.slice(0, 10).join('\n') + (total.invalidos.length > 10 ? '\n…' : '') : ''));
+    await load();
+  });
+
+  // ── Cadastro / edição (somente administradores) ──
+  const fields = { nome: 'mNome', cargo: 'mCargo', ramal: 'mRamal', celular: 'mCel', email: 'mEmail', secretaria: 'mSec', divisao: 'mDiv', departamento: 'mDep' };
+  function renderChips() {
+    $('mChips').innerHTML = modalTags.map((t, i) => `<button type="button" class="ag-tag" data-rm="${i}" title="Remover">${escapeHtml(t)}</button>`).join('');
+  }
+  function addTag(raw) {
+    const t = raw.replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (t && modalTags.length < 15 && !modalTags.some((x) => x.toLowerCase() === t.toLowerCase())) modalTags.push(t);
+    $('mTagIn').value = ''; renderChips();
+  }
+  $('mTagIn').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag($('mTagIn').value); }
+    else if (e.key === 'Backspace' && !$('mTagIn').value && modalTags.length) { modalTags.pop(); renderChips(); }
+  });
+  $('mTagIn').addEventListener('change', () => addTag($('mTagIn').value));
+  $('mChips').addEventListener('click', (e) => { const b = e.target.closest('[data-rm]'); if (b) { modalTags.splice(Number(b.dataset.rm), 1); renderChips(); } });
+
+  function openModal(c) {
+    editingId = c ? c.id : null;
+    modalTags = c ? [...c.etiquetas] : []; renderChips(); $('mTagIn').value = '';
+    $('mTitle').textContent = c ? 'Editar contato' : 'Novo contato';
+    Object.entries(fields).forEach(([k, id]) => { $(id).value = c ? (c[k] || '') : ''; });
+    $('mAtivo').checked = c ? !!c.ativo : true;
+    $('mMsg').className = 'form-msg';
+    $('modalBg').classList.add('is-open'); $('mNome').focus();
+  }
+  const closeModal = () => $('modalBg').classList.remove('is-open');
+  $('newBtn').addEventListener('click', () => openModal(null));
+  $('mCancel').addEventListener('click', closeModal);
+  $('modalBg').addEventListener('click', (e) => { if (e.target === $('modalBg')) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  $('mSave').addEventListener('click', async () => {
+    addTag($('mTagIn').value);
+    const body = { ativo: $('mAtivo').checked, etiquetas: modalTags };
+    Object.entries(fields).forEach(([k, id]) => { body[k] = $(id).value; });
+    try {
+      await api(editingId ? `/api/agenda/${editingId}` : '/api/agenda', { method: editingId ? 'PUT' : 'POST', body: JSON.stringify(body) });
+      closeModal(); await load();
+    } catch (e) { $('mMsg').textContent = e.message; $('mMsg').className = 'form-msg is-error'; }
+  });
+
+  // ── Cliques na lista: favorito, etiqueta (filtra), editar, excluir ──
+  $('listArea').addEventListener('click', async (e) => {
+    const fav = e.target.closest('[data-fav]'), tg = e.target.closest('[data-tag]');
+    const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]');
+    if (fav) { const id = Number(fav.dataset.fav); favs.has(id) ? favs.delete(id) : favs.add(id); saveFavs(); render(); return; }
+    if (tg) { $('fTag').value = tg.dataset.tag; render(); return; }
+    if (ed) openModal(all.find((c) => c.id === Number(ed.dataset.edit)));
+    if (del) {
+      const c = all.find((x) => x.id === Number(del.dataset.del));
+      if (!confirm(`Excluir "${c.nome}" da agenda?`)) return;
+      try { await api(`/api/agenda/${c.id}`, { method: 'DELETE' }); await load(); } catch (err) { alert(err.message); }
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

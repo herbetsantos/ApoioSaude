@@ -52,6 +52,9 @@ const TOPBAR_HTML = `
           <div class="submenu" id="ferramentasMenu"></div>
         </div>
         <div class="nav__item">
+          <a class="nav__link" data-nav="agenda" href="/agenda.html"><span class="label-text">AGENDA</span></a>
+        </div>
+        <div class="nav__item">
           <a class="nav__link" data-nav="documentos" href="/documentos.html"><span class="label-text">DOCUMENTOS ÚTEIS</span></a>
         </div>
         <div class="nav__item">
@@ -162,6 +165,8 @@ function renderTopbarUser(user) {
   // Documentos Úteis / Manuais de Uso ficam visíveis por padrão; só escondemos
   // se a permissão vier explicitamente desligada (evita esconder tudo caso a
   // migração de permissões ainda não tenha rodado no ambiente).
+  const agLink = document.querySelector('[data-nav="agenda"]');
+  if (agLink) agLink.style.display = perms.agenda === false ? 'none' : '';
   const docLink = document.querySelector('[data-nav="documentos"]');
   if (docLink) docLink.style.display = perms.documentos === false ? 'none' : '';
   const manLink = document.querySelector('[data-nav="manuais"]');
