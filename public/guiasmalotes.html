@@ -1140,7 +1140,11 @@ function montarViaTermo(unidadeNome, dataFmt, itens) {
 ────────────────────────────────────────────────────── */
 async function renderViaComoImagem(viaHtml) {
   const via = document.createElement('div');
-  via.style.cssText = 'width:148.5mm;height:210mm;background:#fff;box-sizing:border-box;overflow:hidden;';
+  // Cor de texto e esquema de cor FIXOS: o documento impresso nunca deve
+  // herdar o tema da página (no modo escuro/alto contraste o <body> define
+  // color:var(--ink) claro, e o texto sem cor explícita saía branco sobre
+  // o fundo branco do PDF). #1b2340 é a cor do tema claro original.
+  via.style.cssText = 'width:148.5mm;height:210mm;background:#fff;color:#1b2340;color-scheme:light;box-sizing:border-box;overflow:hidden;';
   via.innerHTML = viaHtml;
 
   const sandbox = document.createElement('div');
