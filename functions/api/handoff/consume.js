@@ -1,10 +1,7 @@
 import { json } from '../_utils.js';
 
 function validServiceSecret(request, env) {
-  const expected = String(env.EMULTI_HANDOFF_SECRET || '');
-  const supplied = String(request.headers.get('X-Handoff-Secret') || '');
-  if (!expected || !supplied || expected.length !== supplied.length) return false;
-  let diff = 0;
+  const expected = String(env.APS_HANDOFF_SECRET || '');  let diff = 0;
   for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ supplied.charCodeAt(i);
   return diff === 0;
 }
